@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PropIQ — Your Analysis Results</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0e11;--bg2:#13151a;--bg3:#1a1d24;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#e8e6e0;--muted:#6b6960;
+  --accent:#c8f060;--accent2:#5be3a8;--accent3:#f07060;--accent4:#60b8f0;
+  --serif:'DM Serif Display',serif;
+  --sans:'Instrument Sans',sans-serif;
+  --mono:'DM Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+
+.wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:0 2rem 4rem}
+
+/* fade in */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.fade{animation:fadeUp .5s ease both}
+.fade-1{animation-delay:.05s}.fade-2{animation-delay:.12s}.fade-3{animation-delay:.2s}.fade-4{animation-delay:.28s}.fade-5{animation-delay:.36s}
+
+/* ── NAV ── */
+nav{display:flex;align-items:center;justify-content:space-between;padding:1.5rem 2rem;max-width:960px;margin:0 auto}
+.logo{font-family:var(--serif);font-size:1.2rem;color:var(--text)}
+.logo span{color:var(--accent);font-style:italic}
+.nav-right{display:flex;align-items:center;gap:12px}
+.nav-badge{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(200,240,96,.08);border:0.5px solid rgba(200,240,96,.2);padding:5px 12px;border-radius:99px}
+.nav-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.nav-date{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+/* ── HEADER ── */
+.header{padding:2.5rem 0 2rem;border-bottom:0.5px solid var(--border);margin-bottom:2rem}
+.header-tag{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem}
+.header h1{font-family:var(--serif);font-size:clamp(1.8rem,4vw,2.8rem);font-weight:400;line-height:1.1;margin-bottom:.5rem}
+.header h1 em{color:var(--accent);font-style:italic}
+.header-meta{font-size:13px;color:var(--muted);display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:.75rem}
+.header-meta span{display:flex;align-items:center;gap:5px}
+
+/* ── KPIs ── */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:1.5rem}
+.kpi{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;padding:1.1rem 1.25rem;transition:border-color .2s}
+.kpi:hover{border-color:var(--border2)}
+.kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-family:var(--mono)}
+.kpi-value{font-size:1.7rem;font-family:var(--serif);color:var(--text);line-height:1}
+.kpi-delta{font-size:11px;margin-top:5px;font-family:var(--mono)}
+.up{color:var(--accent2)}.down{color:var(--accent3)}.neutral{color:var(--muted)}
+
+/* ── CHARTS ── */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.chart-full{grid-column:1/-1}
+.card{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;padding:1.25rem;transition:border-color .2s}
+.card:hover{border-color:var(--border2)}
+.card-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem;font-family:var(--mono)}
+.chart-wrap{position:relative;height:200px}
+.chart-wrap-tall{position:relative;height:240px}
+
+/* ── TABLE ── */
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table th{text-align:left;padding:7px 10px;color:var(--muted);font-weight:500;border-bottom:0.5px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-family:var(--mono)}
+.data-table td{padding:9px 10px;color:var(--text);border-bottom:0.5px solid var(--border);font-family:var(--mono);font-size:12px}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:rgba(255,255,255,.02)}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-family:var(--mono)}
+.pill-g{background:rgba(91,227,168,.12);color:var(--accent2)}
+.pill-r{background:rgba(240,112,96,.12);color:var(--accent3)}
+.pill-y{background:rgba(200,240,96,.1);color:var(--accent)}
+
+/* ── AI INSIGHTS ── */
+.ai-section{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.ai-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:0.5px solid var(--border)}
+.ai-header-left{display:flex;align-items:center;gap:10px}
+.ai-icon{width:28px;height:28px;background:rgba(200,240,96,.1);border:0.5px solid rgba(200,240,96,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.ai-title{font-size:13px;font-weight:500}
+.ai-sub{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.ai-body{padding:1.25rem}
+.insight-block{background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:1rem 1.1rem;margin-bottom:10px;font-size:13px;line-height:1.75}
+.insight-block:last-child{margin-bottom:0}
+.insight-label{font-size:10px;font-family:var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.reco-block{border-color:rgba(91,227,168,.18)}
+.reco-label{color:var(--accent2)}
+
+/* ── FOOTER ── */
+.report-footer{margin-top:2.5rem;padding-top:1.5rem;border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.report-footer-left{font-size:12px;color:var(--muted)}
+.powered{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.powered span{color:var(--accent)}
+
+@media(max-width:580px){.charts-grid{grid-template-columns:1fr}.chart-full{grid-column:1}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Prop<span>IQ</span></div>
+  <div class="nav-right">
+    <div class="nav-date" id="reportDate"></div>
+    <div class="nav-badge">Analysis ready</div>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header fade fade-1">
+    <div class="header-tag">AI Real Estate Analysis Report</div>
+    <h1>Sunrise Realty Group<br><em>Q2 2025 Performance</em></h1>
+    <div class="header-meta">
+      <span>📍 Miami, FL</span>
+      <span>🏠 <span id="totalProps">5</span> properties analyzed</span>
+      <span>👤 Sarah Johnson</span>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis fade fade-2">
+    <div class="kpi">
+      <div class="kpi-label">Total listings</div>
+      <div class="kpi-value">5</div>
+      <div class="kpi-delta neutral">Q2 2025</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Avg days on market</div>
+      <div class="kpi-value">25.6</div>
+      <div class="kpi-delta up">▲ below 30 avg</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Sale/list ratio</div>
+      <div class="kpi-value">97.8%</div>
+      <div class="kpi-delta up">▲ strong pricing</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Top lead source</div>
+      <div class="kpi-value" style="font-size:1.2rem;padding-top:4px">Zillow</div>
+      <div class="kpi-delta up">▲ 2 closings</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Sold properties</div>
+      <div class="kpi-value">4</div>
+      <div class="kpi-delta up">▲ 80% close rate</div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 1 -->
+  <div class="charts-grid fade fade-3">
+    <div class="card chart-full">
+      <div class="card-title">Sale price vs list price by property</div>
+      <div class="chart-wrap-tall"><canvas id="barChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 2 -->
+  <div class="charts-grid fade fade-3">
+    <div class="card">
+      <div class="card-title">Lead source breakdown</div>
+      <div class="chart-wrap"><canvas id="doughnutChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Days on market by property</div>
+      <div class="chart-wrap"><canvas id="domChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card fade fade-3" style="margin-bottom:12px">
+    <div class="card-title">Property breakdown</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Address</th>
+          <th>List price</th>
+          <th>Sale price</th>
+          <th>DOM</th>
+          <th>Lead source</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>123 Oak St, Miami</td><td>$450,000</td><td>$432,000</td><td>18</td><td>Zillow</td><td><span class="pill pill-g">Sold</span></td></tr>
+        <tr><td>456 Palm Ave, Houston</td><td>$320,000</td><td>$315,000</td><td>25</td><td>Referral</td><td><span class="pill pill-g">Sold</span></td></tr>
+        <tr><td>789 Elm Blvd, Phoenix</td><td>$285,000</td><td>—</td><td>42</td><td>Google Ads</td><td><span class="pill pill-y">Active</span></td></tr>
+        <tr><td>321 Maple Dr, Atlanta</td><td>$510,000</td><td>$498,000</td><td>12</td><td>MLS</td><td><span class="pill pill-g">Sold</span></td></tr>
+        <tr><td>654 Pine Rd, Dallas</td><td>$175,000</td><td>$170,000</td><td>31</td><td>Zillow</td><td><span class="pill pill-g">Sold</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- AI INSIGHTS -->
+  <div class="ai-section fade fade-4">
+    <div class="ai-header">
+      <div class="ai-header-left">
+        <div class="ai-icon">✦</div>
+        <div>
+          <div class="ai-title">AI Insights</div>
+          <div class="ai-sub">Powered by Gemini 2.5</div>
+        </div>
+      </div>
+    </div>
+    <div class="ai-body">
+      <div class="insight-block">
+        <div class="insight-label">✦ Strong close rate</div>
+        4 out of 5 properties sold at an average of 97.8% of list price — indicating your pricing strategy is well-calibrated to market demand. The Atlanta property closed fastest at 12 days, suggesting premium properties in that market move quickly when priced correctly.
+      </div>
+      <div class="insight-block">
+        <div class="insight-label">✦ Zillow dominates your pipeline</div>
+        Zillow generated 40% of your lead sources and contributed to 2 successful closings. Google Ads, however, produced 1 active listing still on market at 42 days — the highest DOM in your portfolio, suggesting lead quality from that channel may need evaluation.
+      </div>
+      <div class="insight-block">
+        <div class="insight-label">✦ Phoenix listing needs attention</div>
+        789 Elm Blvd has been active for 42 days with no sale — 64% longer than your portfolio average of 25.6 days. Consider a price adjustment of 3–5% or increased marketing spend on higher-converting channels like Zillow or referrals.
+      </div>
+      <div class="insight-block reco-block">
+        <div class="insight-label reco-label">→ Recommendation 1</div>
+        Double down on Zillow and referral channels — they produce your fastest closings and best sale-to-list ratios. Reduce Google Ads budget and reallocate to Zillow Premier Agent for the Phoenix market.
+      </div>
+      <div class="insight-block reco-block">
+        <div class="insight-label reco-label">→ Recommendation 2</div>
+        Set a 30-day DOM threshold alert. Any listing exceeding 30 days should trigger an automatic price review meeting. Your data shows a clear correlation between DOM over 30 and failed conversions.
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="report-footer fade fade-5">
+    <div class="report-footer-left">
+      Report generated for <strong>Sunrise Realty Group</strong> · <span id="footerDate"></span>
+    </div>
+    <div class="powered">Powered by <span>PropIQ</span> × Gemini AI</div>
+  </div>
+
+</div>
+
+<script>
+// Date
+const now = new Date();
+const dateStr = now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+document.getElementById('reportDate').textContent = dateStr;
+document.getElementById('footerDate').textContent = dateStr;
+
+const cfg = {
+  responsive:true,
+  maintainAspectRatio:false,
+  plugins:{legend:{display:false}},
+  scales:{
+    x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b6960',font:{size:10}}},
+    y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b6960',font:{size:10}}}
+  }
+};
+
+// Bar chart — list vs sale
+new Chart(document.getElementById('barChart'),{
+  type:'bar',
+  data:{
+    labels:['123 Oak','456 Palm','321 Maple','654 Pine'],
+    datasets:[
+      {label:'List price',data:[450000,320000,510000,175000],backgroundColor:'rgba(200,240,96,.25)',borderColor:'#c8f060',borderWidth:1,borderRadius:4},
+      {label:'Sale price',data:[432000,315000,498000,170000],backgroundColor:'rgba(91,227,168,.25)',borderColor:'#5be3a8',borderWidth:1,borderRadius:4}
+    ]
+  },
+  options:{
+    ...cfg,
+    plugins:{
+      legend:{display:true,labels:{color:'#6b6960',font:{size:10},boxWidth:10,padding:16}},
+      tooltip:{callbacks:{label:ctx=>'$'+ctx.raw.toLocaleString()}}
+    },
+    scales:{
+      x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b6960',font:{size:10}}},
+      y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b6960',font:{size:10},callback:v=>'$'+(v/1000).toFixed(0)+'k'}}
+    }
+  }
+});
+
+// Doughnut — lead source
+new Chart(document.getElementById('doughnutChart'),{
+  type:'doughnut',
+  data:{
+    labels:['Zillow','Referral','Google Ads','MLS'],
+    datasets:[{data:[2,1,1,1],backgroundColor:['#c8f060','#5be3a8','#60b8f0','#f07060'],borderWidth:0}]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,cutout:'65%',
+    plugins:{legend:{position:'right',labels:{color:'#6b6960',font:{size:10},padding:8,boxWidth:8}}}
+  }
+});
+
+// Bar — DOM
+new Chart(document.getElementById('domChart'),{
+  type:'bar',
+  data:{
+    labels:['321 Maple','123 Oak','456 Palm','654 Pine','789 Elm'],
+    datasets:[{
+      data:[12,18,25,31,42],
+      backgroundColor:ctx=>{
+        const v=ctx.raw;
+        return v<=20?'rgba(91,227,168,.4)':v<=30?'rgba(200,240,96,.4)':'rgba(240,112,96,.4)';
+      },
+      borderColor:ctx=>{
+        const v=ctx.raw;
+        return v<=20?'#5be3a8':v<=30?'#c8f060':'#f07060';
+      },
+      borderWidth:1,borderRadius:4
+    }]
+  },
+  options:{
+    ...cfg,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+' days'}}},
+    scales:{
+      x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b6960',font:{size:9}}},
+      y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6b6960',font:{size:10},callback:v=>v+'d'}}
+    }
+  }
+});
+</script>
+</body>
+</html>
