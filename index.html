@@ -125,7 +125,7 @@ footer{text-align:center;padding:2rem;font-size:11px;color:var(--muted);border-t
 
 <div class="wrap">
   <section class="hero">
-    <div class="hero-tag">Real estate · AI analysis · 60 seconds</div>
+    <div class="hero-tag">Real estate · AI analysis · 30 min</div>
     <h1>Your listings.<br><em>Analyzed.</em> Instantly.</h1>
     <p>Paste your property spreadsheet and get an AI-powered breakdown of your top leads, conversion rates, and revenue insights — automatically.</p>
 
@@ -206,9 +206,9 @@ footer{text-align:center;padding:2rem;font-size:11px;color:var(--muted);border-t
     </div>
 
     <div class="proof">
-      <div class="proof-item"><div class="proof-val">60s</div><div class="proof-lbl">Analysis time</div></div>
+      <div class="proof-item"><div class="proof-val">30 min</div><div class="proof-lbl">Analysis time</div></div>
       <div class="proof-item"><div class="proof-val">$0</div><div class="proof-lbl">First report free</div></div>
-      <div class="proof-item"><div class="proof-val">AI</div><div class="proof-lbl">Powered by Gemini</div></div>
+      <div class="proof-item"><div class="proof-val">AI</div><div class="proof-lbl">Powered by PropIQ</div></div>
     </div>
   </section>
 
@@ -223,7 +223,7 @@ footer{text-align:center;padding:2rem;font-size:11px;color:var(--muted);border-t
       <div class="how-card">
         <div class="how-card-num">02</div>
         <div class="how-card-title">AI reads everything</div>
-        <div class="how-card-desc">Gemini 2.5 analyzes your data: conversion rates, days on market, top performers.</div>
+        <div class="how-card-desc">PropIQ analyzes your data: conversion rates, days on market, top performers.</div>
       </div>
       <div class="how-card">
         <div class="how-card-num">03</div>
@@ -242,8 +242,7 @@ footer{text-align:center;padding:2rem;font-size:11px;color:var(--muted);border-t
 <footer>© 2025 PropIQ · AI-powered real estate analytics</footer>
 
 <script>
-// ── REPLACE THIS with your N8N webhook URL ──
-const N8N_WEBHOOK_URL = 'https://llopiq8.app.n8n.cloud/webhook/propiq-analysis';
+const N8N_WEBHOOK_URL = 'https://kjnuoeqq.app.n8n.cloud/webhook/lp1-analysis';
 
 function validate() {
   let ok = true;
@@ -282,7 +281,13 @@ async function submitForm() {
     const res = await fetch(N8N_WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        name:     payload.name,
+        email:    payload.email,
+        company:  payload.company,
+        sheetUrl: payload.sheetUrl,
+        sheetId:  payload.sheetId,
+      })
     });
 
     if (!res.ok) throw new Error('Server error');
