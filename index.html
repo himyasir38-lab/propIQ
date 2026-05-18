@@ -242,7 +242,7 @@ footer{text-align:center;padding:2rem;font-size:11px;color:var(--muted);border-t
 <footer>© 2025 PropIQ · AI-powered real estate analytics</footer>
 
 <script>
-const N8N_WEBHOOK_URL = 'https://kjnuoeqq.app.n8n.cloud/webhook/lp1-analysis';
+const WEBHOOK_URL = 'https://kjnuoeqq.app.n8n.cloud/webhook/f2868df1-2161-4af0-9eb3-2db9dcb03bf5';
 
 function validate() {
   let ok = true;
@@ -278,7 +278,7 @@ async function submitForm() {
   document.getElementById('submitBtn').disabled = true;
 
   try {
-    const res = await fetch(N8N_WEBHOOK_URL, {
+    const res = await fetch(WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
